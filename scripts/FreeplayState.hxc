@@ -44,6 +44,8 @@ class LiquidGlass extends Module {
 
     var shaderDataWindow;
 
+    var fuckYou;
+
     var blurShader = new FlxRuntimeShader(Assets.getText(Paths.frag('GaussianBlur')));
     var blurFilter = new ShaderFilter(blurShader);
     
@@ -66,10 +68,12 @@ class LiquidGlass extends Module {
         shader.setFloat('blurAmount', 1.0);
         FlxG.camera.filters = [blurFilter, glassFilter];
         
-        var fuckYou = new FlxSprite(-500, -500).makeGraphic(FlxG.width+1000, FlxG.height+1000, 0xFF000000);
-        fuckYou.scrollFactor.set();
-        fuckYou.alpha = 0.2;
-        add(fuckYou);
+        if (!FlxG.state.members.contains(fuckYou)) {
+            fuckYou = new FlxSprite(-500, -500).makeGraphic(FlxG.width+1000, FlxG.height+1000, 0xFF000000);
+            fuckYou.scrollFactor.set();
+            fuckYou.alpha = 0.3;
+            add(fuckYou);
+        }
 
         textCamera = new FlxCamera();
         textCamera.bgColor = 0x00000000;
