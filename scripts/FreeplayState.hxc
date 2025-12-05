@@ -1,0 +1,175 @@
+import flixel.FlxG;
+import flixel.FlxSprite;
+import funkin.Conductor;
+import flixel.text.FlxText;
+import flixel.math.FlxMath;
+import funkin.util.FileUtil;
+import funkin.util.MathUtil;
+import flixel.util.FlxTimer;
+import funkin.PlayerSettings;
+import flixel.tweens.FlxEase;
+import funkin.util.Constants;
+import flixel.tweens.FlxTween;
+import funkin.util.ReflectUtil;
+import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
+import funkin.modding.module.Module;
+import funkin.modding.PolymodHandler;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.freeplay.DifficultyDot;
+import funkin.ui.mainmenu.MainMenuState;
+import flixel.group.FlxTypedSpriteGroup;
+import haxe.ui.RuntimeComponentBuilder;
+import haxe.ui.containers.windows.WindowManager;
+
+import openfl.filters.BlurFilter;
+
+import flixel.FlxCamera;
+
+import haxe.ui.Toolkit;
+
+import openfl.filters.ShaderFilter;
+import flixel.addons.display.FlxRuntimeShader;
+
+import funkin.util.SwipeUtil;
+import funkin.util.FileUtil;
+import funkin.util.MathUtil;
+import funkin.util.TouchUtil;
+
+class LiquidGlass extends Module {
+
+    var textCamera;
+    var text = new FlxText(0, 0, null, 'Liquid Glass');
+    var credits = new FlxText(0, 0, null, 'Liquid Glass Demo By: NebulaStellaNova\nGaussian Blur Shader By: existical (ShaderToy)\nOriginal Liquid Glass Shader By: MetroWind (ShaderToy)');
+
+    var shaderDataWindow;
+
+    var blurShader = new FlxRuntimeShader(Assets.getText(Paths.frag('GaussianBlur')));
+    var blurFilter = new ShaderFilter(blurShader);
+    
+    var shader = new FlxRuntimeShader(Assets.getText(Paths.frag('LiquidGlass')));
+    var glassFilter = new ShaderFilter(shader);
+	var addedObjects:Bool = false;
+    
+    public function new() {
+		super('LiquidGlass');
+	}
+
+    override function onSubStateCloseEnd(event) {
+		super.onSubStateCloseEnd(event);
+        addedObjects = false;
+	}
+
+    var blurAmount = 1.0;
+
+    function onCreatePost(state, add) {
+        shader.setFloat('blurAmount', 1.0);
+        FlxG.camera.filters = [blurFilter, glassFilter];
+        
+        var fuckYou = new FlxSprite(-500, -500).makeGraphic(FlxG.width+1000, FlxG.height+1000, 0xFF000000);
+        fuckYou.scrollFactor.set();
+        fuckYou.alpha = 0.2;
+        add(fuckYou);
+
+        textCamera = new FlxCamera();
+        textCamera.bgColor = 0x00000000;
+        if (!FlxG.cameras.list.contains(textCamera)) {
+            FlxG.cameras.add(textCamera, false);
+        }
+        
+        Toolkit.styleSheet.parse(".body, .label, .link, .textfield, .textarea { font-name: \"Inconsolata\"; font-size: 14px; font-bold: true; }");
+        if (!FlxG.state.members.contains(shaderDataWindow)) {
+            shaderDataWindow = RuntimeComponentBuilder.build(Paths.ui("shaderData"));
+            shaderDataWindow.windowManager = new WindowManager();
+            shaderDataWindow.cameras = [textCamera];
+            shaderDataWindow.title = "Liquid Glass Properties";
+            add(shaderDataWindow);
+        }
+        text.setFormat(Paths.font('sf.otf'), 50*2);
+        text.scale.set(0.5, 0.5);
+        text.updateHitbox();
+        text.screenCenter();
+        text.cameras = [textCamera];
+        if (!FlxG.state.members.contains(text))
+            add(text);
+
+        credits.setFormat(Paths.font('sf.otf'), 15*2);
+        credits.scale.set(0.5, 0.5);
+        credits.updateHitbox();
+        credits.x = FlxG.width - credits.width - 5;
+        credits.y = FlxG.height - credits.height - 5;
+        credits.alignment = "right";
+        credits.cameras = [textCamera];
+        if (!FlxG.state.members.contains(credits))
+            add(credits);
+
+        //menuBar.findComponent("menuBarTitle").text = editorTitle + " v" + editorVersion;
+    }
+    
+    function onUpdatePost(event) {
+        if (shaderDataWindow == null) return;
+        shader.setFloatArray('iMouse', [(FlxG.width/2) + (blurShader.blurX*2), FlxG.height/2, 0.0, 0.0]);
+        /* if (FlxG.keys.justPressed.J) { blurAmount -= 0.1; trace(blurAmount); }
+        if (FlxG.keys.justPressed.K) { blurAmount += 0.1; trace(blurAmount); }
+        if (FlxG.mouse.pressed && !FlxG.mouse.overlaps(shaderDataWindow)) {
+            FlxG.mouse.visible = false;
+            shader.setFloatArray('iMouse', [FlxG.mouse.x, FlxG.mouse.y - FlxG.camera.scroll.y, 0.0, 0.0]);
+        } else { */
+            FlxG.mouse.visible = true;
+        // }
+
+        if (FlxG.mouse.overlaps(text, textCamera) && FlxG.mouse.justPressed) {
+            text.scale.x -= 0.02;
+            text.scale.y -= 0.02;
+        }
+        text.scale.x = MathUtil.coolLerp(text.scale.x, FlxG.mouse.overlaps(text, textCamera) ? 0.55 : 0.5, 0.1);
+        text.scale.y = MathUtil.coolLerp(text.scale.y, FlxG.mouse.overlaps(text, textCamera) ? 0.55 : 0.5, 0.1);
+        text.updateHitbox();
+        text.screenCenter();
+
+
+        var color = shaderDataWindow.findComponent('shaderTint').selectedItem;
+        shader.setFloatArray('tintColorRGB', [
+            (color >> 16) & 0xff, 
+            (color >> 8) & 0xff,
+            color & 0xff
+        ]);
+
+        blurShader.setFloat('Size', shaderDataWindow.findComponent('bgBlur').pos/5);
+
+        shaderDataWindow.findComponent('bgBlurString').text = Math.round(shaderDataWindow.findComponent('bgBlur').pos) + "%";
+        shader.setFloat('tintMixAmount', shaderDataWindow.findComponent('colorMix').pos);
+        shaderDataWindow.findComponent('mixString').text = addZeros(Math.round(shaderDataWindow.findComponent('colorMix').pos*100)/100);
+        shader.setFloat('blurAmount', shaderDataWindow.findComponent('shaderBlur').pos * 3);
+        shaderDataWindow.findComponent('blurString').text = addZeros(Math.round(shaderDataWindow.findComponent('shaderBlur').pos*100)/100);
+        shader.setFloat('distortionIntensity', shaderDataWindow.findComponent('shaderDistortion').pos * 5);
+        shaderDataWindow.findComponent('distortionString').text = addZeros(Math.round(shaderDataWindow.findComponent('shaderDistortion').pos*100)/100);
+        shader.setFloat('capsuleWidth', (shaderDataWindow.findComponent('shaderWidth').pos * FlxG.width) * (text.scale.x*2));
+        shader.setFloat('capsuleHeight', (shaderDataWindow.findComponent('shaderHeight').pos * FlxG.height) * (text.scale.x*2));
+
+    }
+
+    function addZeros(string:Dynamic) {
+        string = Std.string(string);
+        string = string.split("").length - 1 == 2 ? string + "0" : string;
+        string = string.split("").length - 1 == 0 ? string + ".00" : string;
+        return string;
+    }
+    
+	override function onUpdate(event:UpdateScriptEvent) {
+		super.onUpdate(event);
+		
+		if (!Std.isOfType(FlxG.state, MainMenuState)) return;
+		
+		var state = FlxG.state;
+        var add = state.add;
+
+		if (!addedObjects) {
+			addedObjects = true;
+            onCreatePost(state, add);
+        } else {
+            onUpdatePost(event);
+        }
+    }
+
+}
