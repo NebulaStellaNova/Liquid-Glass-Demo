@@ -15,6 +15,7 @@ import funkin.audio.FunkinSound;
 import funkin.graphics.FunkinSprite;
 import funkin.modding.module.Module;
 import funkin.modding.PolymodHandler;
+import haxe.ui.components.ColorPicker;
 import funkin.ui.freeplay.FreeplayState;
 import funkin.ui.freeplay.DifficultyDot;
 import funkin.ui.mainmenu.MainMenuState;
@@ -130,7 +131,6 @@ class LiquidGlass extends Module {
         text.updateHitbox();
         text.screenCenter();
 
-
         var color = shaderDataWindow.findComponent('shaderTint').selectedItem;
         shader.setFloatArray('tintColorRGB', [
             (color >> 16) & 0xff, 
@@ -139,8 +139,6 @@ class LiquidGlass extends Module {
         ]);
 
         blurShader.setFloat('Size', shaderDataWindow.findComponent('bgBlur').pos/5);
-        
-        shader.setFloat('blurQuality', 1);//shaderDataWindow.findComponent('outline').pos);
 
         shader.setFloat('outlineOpacity', shaderDataWindow.findComponent('outline').pos);
         shaderDataWindow.findComponent('outlineString').text = Math.round(shaderDataWindow.findComponent('outline').pos * 100) + "%";
