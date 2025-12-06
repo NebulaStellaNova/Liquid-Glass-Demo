@@ -1,5 +1,7 @@
 I know the color picker is on camGame, I don't feel like fixing it....
 
+You can show / hide the shader properties window with E (if it feels like working)
+
 If you use any code from this, please credit me :pray:<br>
 And if you use the shaders, please credit the original shader creators.
 
