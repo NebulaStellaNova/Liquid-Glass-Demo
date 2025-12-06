@@ -39,7 +39,9 @@ import funkin.util.TouchUtil;
 
 class LiquidGlass extends Module {
 
+    var gameCamera;
     var textCamera;
+    var uiCamera;
     var text;
     var credits;
 
@@ -67,7 +69,6 @@ class LiquidGlass extends Module {
 
     function onCreatePost(state, add) {
         shader.setFloat('blurAmount', 1.0);
-        FlxG.camera.filters = [blurFilter, glassFilter];
         
         if (!FlxG.state.members.contains(fuckYou)) {
             fuckYou = new FlxSprite(-500, -500).makeGraphic(FlxG.width+1000, FlxG.height+1000, 0xFF000000);
@@ -75,17 +76,32 @@ class LiquidGlass extends Module {
             fuckYou.alpha = 0.3;
             add(fuckYou);
         }
+        
+        gameCamera = new FlxCamera();
+        gameCamera.bgColor = 0x00000000;
+        FlxG.cameras.add(gameCamera, false);
+
+
+        gameCamera.follow(state.camFollow, null, 0.06);
+        
+        gameCamera.filters = [blurFilter, glassFilter];
+
+        for (i in state.members) {
+            i.cameras = [gameCamera];
+        }
 
         textCamera = new FlxCamera();
         textCamera.bgColor = 0x00000000;
-        if (!FlxG.cameras.list.contains(textCamera)) {
-            FlxG.cameras.add(textCamera, false);
-        }
+        FlxG.cameras.add(textCamera, false);
+
+        uiCamera = new FlxCamera();
+        uiCamera.bgColor = 0x00000000;
+        FlxG.cameras.add(uiCamera, true);
         
         Toolkit.styleSheet.parse(".body, .label, .link, .textfield, .textarea { font-name: \"Inconsolata\"; font-size: 14px; font-bold: true; }");
         shaderDataWindow = RuntimeComponentBuilder.build(Paths.ui("shaderData"));
         shaderDataWindow.windowManager = new WindowManager();
-        shaderDataWindow.cameras = [textCamera];
+        shaderDataWindow.cameras = [uiCamera];
         shaderDataWindow.title = "Liquid Glass Properties";
         add(shaderDataWindow);
 
@@ -155,6 +171,14 @@ class LiquidGlass extends Module {
         shaderDataWindow.findComponent('distortionString').text = addZeros(Math.round(shaderDataWindow.findComponent('shaderDistortion').pos*100)/100);
         shader.setFloat('capsuleWidth', (shaderDataWindow.findComponent('shaderWidth').pos * FlxG.width) * (text.scale.x*2));
         shader.setFloat('capsuleHeight', (shaderDataWindow.findComponent('shaderHeight').pos * FlxG.height) * (text.scale.x*2));
+
+        if (FlxG.state.subState != null) {
+            uiCamera.follow(FlxG.state.subState.camFocusPoint, null, 0.06);
+        }
+
+        if (FlxG.keys.justPressed.E) {
+            uiCamera.visible = !uiCamera.visible;
+        }
 
     }
 
