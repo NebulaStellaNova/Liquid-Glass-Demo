@@ -39,8 +39,8 @@ import funkin.util.TouchUtil;
 class LiquidGlass extends Module {
 
     var textCamera;
-    var text = new FlxText(0, 0, null, 'Liquid Glass');
-    var credits = new FlxText(0, 0, null, 'Liquid Glass Demo By: NebulaStellaNova\nGaussian Blur Shader By: existical (ShaderToy)\nOriginal Liquid Glass Shader By: MetroWind (ShaderToy)');
+    var text;
+    var credits;
 
     var shaderDataWindow;
 
@@ -82,21 +82,21 @@ class LiquidGlass extends Module {
         }
         
         Toolkit.styleSheet.parse(".body, .label, .link, .textfield, .textarea { font-name: \"Inconsolata\"; font-size: 14px; font-bold: true; }");
-        if (!FlxG.state.members.contains(shaderDataWindow)) {
-            shaderDataWindow = RuntimeComponentBuilder.build(Paths.ui("shaderData"));
-            shaderDataWindow.windowManager = new WindowManager();
-            shaderDataWindow.cameras = [textCamera];
-            shaderDataWindow.title = "Liquid Glass Properties";
-            add(shaderDataWindow);
-        }
+        shaderDataWindow = RuntimeComponentBuilder.build(Paths.ui("shaderData"));
+        shaderDataWindow.windowManager = new WindowManager();
+        shaderDataWindow.cameras = [textCamera];
+        shaderDataWindow.title = "Liquid Glass Properties";
+        add(shaderDataWindow);
+
+        text = new FlxText(0, 0, null, 'Liquid Glass');
         text.setFormat(Paths.font('sf.otf'), 50*2);
         text.scale.set(0.5, 0.5);
         text.updateHitbox();
         text.screenCenter();
         text.cameras = [textCamera];
-        if (!FlxG.state.members.contains(text))
-            add(text);
+        add(text);
 
+        credits = new FlxText(0, 0, null, 'Liquid Glass Demo By: NebulaStellaNova\nGaussian Blur Shader By: existical (ShaderToy)\nOriginal Liquid Glass Shader By: MetroWind (ShaderToy)');
         credits.setFormat(Paths.font('sf.otf'), 15*2);
         credits.scale.set(0.5, 0.5);
         credits.updateHitbox();
@@ -104,8 +104,7 @@ class LiquidGlass extends Module {
         credits.y = FlxG.height - credits.height - 5;
         credits.alignment = "right";
         credits.cameras = [textCamera];
-        if (!FlxG.state.members.contains(credits))
-            add(credits);
+        add(credits);
 
         //menuBar.findComponent("menuBarTitle").text = editorTitle + " v" + editorVersion;
     }
@@ -140,6 +139,14 @@ class LiquidGlass extends Module {
         ]);
 
         blurShader.setFloat('Size', shaderDataWindow.findComponent('bgBlur').pos/5);
+        
+        shader.setFloat('blurQuality', 1);//shaderDataWindow.findComponent('outline').pos);
+
+        shader.setFloat('outlineOpacity', shaderDataWindow.findComponent('outline').pos);
+        shaderDataWindow.findComponent('outlineString').text = Math.round(shaderDataWindow.findComponent('outline').pos * 100) + "%";
+
+        shader.setFloat('cornerRoundingDegree', (360-shaderDataWindow.findComponent('radius').pos)/360);
+        shaderDataWindow.findComponent('cornerString').text = Math.round(shaderDataWindow.findComponent('radius').pos) + "°";
 
         shaderDataWindow.findComponent('bgBlurString').text = Math.round(shaderDataWindow.findComponent('bgBlur').pos) + "%";
         shader.setFloat('tintMixAmount', shaderDataWindow.findComponent('colorMix').pos);
@@ -159,21 +166,24 @@ class LiquidGlass extends Module {
         string = string.split("").length - 1 == 0 ? string + ".00" : string;
         return string;
     }
+
+    var allowUpdate = false;
+
+    public function onStateChangeEnd() {
+		super.onStateChangeEnd();
+        allowUpdate = false;
+        if (FlxG.state is MainMenuState) {
+            onCreatePost(FlxG.state, FlxG.state.add);
+            allowUpdate = true;
+        }
+    }
     
 	override function onUpdate(event:UpdateScriptEvent) {
 		super.onUpdate(event);
 		
-		if (!Std.isOfType(FlxG.state, MainMenuState)) return;
-		
-		var state = FlxG.state;
-        var add = state.add;
-
-		if (!addedObjects) {
-			addedObjects = true;
-            onCreatePost(state, add);
-        } else {
-            onUpdatePost(event);
-        }
+		if (!Std.isOfType(FlxG.state, MainMenuState) || !allowUpdate) return;
+	
+        onUpdatePost(event);
     }
 
 }

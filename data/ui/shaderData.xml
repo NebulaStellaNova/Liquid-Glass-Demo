@@ -2,7 +2,7 @@
 
     <hbox width="100%">
         <label text="Menu Blur:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="bgBlur" width="75%" majorTicks="10" minorTicks="5" pos="0" min="0" max="100" />
+        <slider id="bgBlur" width="75%" pos="0" min="0" max="100" />
         <spacer width="15%"/>
         <label id="bgBlurString" text="0.05" style="padding: 2px;" verticalAlign="center"/>
     </hbox>
@@ -13,34 +13,48 @@
     </hbox>
 
     <hbox width="100%">
+        <label text="Outline Brightness:" style="padding: 2px;" verticalAlign="center"/>
+        <slider id="outline" width="75%" pos="1" min="0" max="1" />
+        <spacer width="15%"/>
+        <label id="outlineString" text="100%" style="padding: 2px;" verticalAlign="center"/>
+    </hbox>
+
+    <hbox width="100%">
+        <label text="Corner Radius:" style="padding: 2px;" verticalAlign="center"/>
+        <slider id="radius" width="75%" pos="180" min="0" max="360" />
+        <spacer width="15%"/>
+        <label id="cornerString" text="0.05" style="padding: 2px;" verticalAlign="center"/>
+    </hbox>
+
+    <hbox width="100%">
         <label text="Color Mix Amount:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="colorMix" width="75%" majorTicks="10" minorTicks="5" pos="0" min="0.00" max="0.5" />
+        <slider id="colorMix" width="75%" pos="0" min="0.00" max="0.5" />
         <spacer width="15%"/>
         <label id="mixString" text="0.05" style="padding: 2px;" verticalAlign="center"/>
     </hbox>
 
     <hbox width="100%">
         <label text="Distortion:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="shaderDistortion" width="75%" majorTicks="10" minorTicks="5" pos="0.15" min="0.0" max="0.5" />
+        <slider id="shaderDistortion" width="75%" pos="0.15" min="0.0" max="0.5" />
         <spacer width="15%"/>
         <label id="distortionString" text="0.05" style="padding: 2px;" verticalAlign="center"/>
     </hbox>
 
     <hbox width="100%">
         <label text="Capsule Blur:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="shaderBlur" width="75%" majorTicks="10" minorTicks="5" pos="0.0" min="0.0" max="1" />
+        <slider id="shaderBlur" width="75%" pos="0.0" min="0.0" max="1" />
         <spacer width="15%"/>
         <label id="blurString" text="0.05" style="padding: 2px;" verticalAlign="center"/>
     </hbox>
 
     <grid width="75%">
         <label text="Width:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="shaderWidth" width="100%" majorTicks="10" minorTicks="5" pos="0.3" min="0" max="1" />
+        <slider id="shaderWidth" width="100%" pos="0.3" min="0" max="1" />
     </grid>
 
     <grid width="75%">
         <label text="Height:" style="padding: 2px;" verticalAlign="center"/>
-        <slider id="shaderHeight" width="100%" majorTicks="10" minorTicks="5" pos="0.14" min="0" max="1" />
+        <slider id="shaderHeight" width="100%" pos="0.14" min="0" max="1" />
     </grid>
     
 </window>
